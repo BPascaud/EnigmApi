@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test POST /questionnaires/nbQuest</title>
+    <title>Employee web app</title>
+    <link class="homer" rel="icon" type="image" href="/homer.jpg">
+    <style>
+        body {
+            padding-top: 50px;
+            background-image:url(https://media.carrefour.fr/medias/f211869e7f63459f987472a9fcfcad10/p_1500x1500/04549526615603_C1N1_s01.jpeg);
+            background-repeat: no-repeat;
+            background-position: top;
+            background-size: 1000px;
+        }
+
+    </style>
+</head>
+<body>
+<h1>Calcule le nombre de questionnaires possibles</h1>
+
+<form id="questionnaire-form">
+    <label>Compétences (séparées par des virgules)</label><br>
+    <input type="text" id="competences" value="java,sql"><br><br>
+
+    <label>Niveaux (séparés par des virgules)</label><br>
+    <input type="text" id="niveaux" value="BRONZE,OR"><br><br>
+
+    <button type="submit">Calculer</button>
+
+</form>
+
+<h2><a th:href="@{/questionnaires/}"><button>Accueil</button></a></h2>
+
+<pre id="resultat"></pre>
+
+<script>
+    const form = document.getElementById("questionnaire-form");
+    const result = document.getElementById("resultat");
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const competences = document.getElementById("competences").value.split(",").map(s => s.trim());
+        const niveaux = document.getElementById("niveaux").value.split(",").map(s => s.trim());
+
+        fetch("http://localhost:8081/questionnaires/nbQuest", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                competences: competences,
+                niveaux: niveaux
+            })
+        })
+            .then(res => res.json())
+            .then(data => result.textContent = "Nombre de questionnaires possibles : " + data)
+            .catch(err => result.textContent = "Erreur : " + err);
+    });
+</script>
+</body>
+</html>

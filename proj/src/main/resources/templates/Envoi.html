@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test POST /questionnaires/envoyer</title>
+    <link class="homer" rel="icon" type="image" href="/homer.jpg">
+    <style>
+        body {
+            padding-top: 50px;
+            background-image:url(https://www.ecommerce-nation.fr/wp-content/uploads/2021/09/assurer-vos-colis.jpg);
+            background-repeat: no-repeat;
+            background-size: 1000px;
+            background-position: top;
+        }
+    </style>
+</head>
+<body>
+<h1>Envoyer un questionnaire à des collaborateurs</h1>
+
+<form action="/questionnaires/envoyer" method="POST" id="envoi-form">
+    <label for="idQuest">ID du questionnaire :</label><br>
+    <input type="number" id="idQuest" name="idQuest" required><br><br>
+
+    <label for="idCollab">IDs des collaborateurs (séparés par des virgules) :</label><br>
+    <input type="text" id="idCollab" name="idCollab" required><br><br>
+
+    <button type="submit">Envoyer</button>
+</form>
+
+<h2><a href="/questionnaires/"><button>Accueil</button></a></h2>
+
+<pre id="resultat"></pre>
+
+<script>
+    const form = document.getElementById("envoi-form");
+    const result = document.getElementById("resultat");
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const idQuest = parseInt(document.getElementById("idQuest").value);
+        const idCollab = document.getElementById("idCollab").value
+            .split(",")  // Séparer les IDs par des virgules
+            .map(id => parseInt(id.trim()))  // Convertir chaque ID en entier et enlever les espaces
+            .filter(id => !isNaN(id));  // Filtrer les valeurs invalides
+
+        if (isNaN(idQuest) || idCollab.length === 0) {
+            result.textContent = "Erreur : L'ID du questionnaire ou les IDs des collaborateurs sont invalides.";
+            return;
+        }
+
+        fetch("http://localhost:8080/questionnaires/envoyer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                idQuest: idQuest,
+                idCollab: idCollab // Envoyer idCollab sous forme de tableau
+            })
+        })
+            .then(res => res.json())
+            .then(data => result.textContent = JSON.stringify(data, null, 2))
+            .catch(err => result.textContent = "Erreur : " + err);
+    });
+</script>
+</body>
+</html>
