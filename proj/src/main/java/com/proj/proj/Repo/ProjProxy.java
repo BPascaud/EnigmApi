@@ -21,12 +21,11 @@ public class ProjProxy {
 
     @Autowired
     private RestTemplate restTemplate;
-    @Autowired
-    private QuestionnaireService questionnaireService;
 
     public Questionnaire creerQuestionnaire(Criteres criteres) {
+        System.out.println("-----------");
         System.out.println("créerQuestionnaire");
-        System.out.println(criteres);
+        System.out.println("Compétences : "+criteres.getCompetences()+"| Niveaux : "+criteres.getNiveaux());
         String url = props.getApiUrl() + "/questionnaires/creer";
         try {
             ResponseEntity<Questionnaire> response = restTemplate.postForEntity(url, criteres, Questionnaire.class);
@@ -38,6 +37,7 @@ public class ProjProxy {
     }
 
     public List<String> envoyerLien(Envoi envoi) {
+        System.out.println("-----------");
         System.out.println("envoiSansUUID");
         String url = props.getApiUrl() + "/questionnaires/envoyer";
         try {
@@ -55,8 +55,9 @@ public class ProjProxy {
     }
 
     public List<String> envoyerLienUUID(Envoi envoi) {
+        System.out.println("-----------");
         System.out.println("envoiUUID");
-        System.out.println(envoi);
+        System.out.println("idQuest : "+envoi.getIdQuest()+"| Nom : "+envoi.getNom());
         String url = props.getApiUrl() + "/questionnaires/envoyerUUID";
         try {
             ResponseEntity<List<String>> response = restTemplate.exchange(
@@ -73,6 +74,7 @@ public class ProjProxy {
     }
 
     public int nbQuest(Criteres criteres) {
+        System.out.println("-----------");
         System.out.println("nbQuest");
         String url = props.getApiUrl() + "/questionnaires/nbQuest";
         try {

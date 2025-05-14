@@ -31,14 +31,6 @@ public class ProjController {
     @Autowired
     private ProjProxy projProxy;
 
-    @Autowired
-    private ErrorService errorService;
-
-    @Autowired
-    private EmailService emailService;
-
-    private final List<Questionnaire> listeQuest = new ArrayList<>();
-
     @GetMapping(" ")
     public String afficherAccueilVide() {
         return "accueil";
@@ -49,77 +41,6 @@ public class ProjController {
         return "accueil";
     }
 
-    @GetMapping("/creer")
-    public String afficherQuestionnaireForm() {
-        return "Creation";
-    }
-
-
-
-    @PostMapping("/creer")
-    public String creerQuestionnaire(@ModelAttribute Criteres criteres) {
-
-        projProxy.creerQuestionnaire(criteres);
-
-        return "redirect:/questionnaires/creer";
-    }
-
-
-    @GetMapping("/envoyer")
-    public String afficherEnvoiForm() {
-        return "Envoi";
-    }
-
-    @PostMapping("/envoyer")
-    public ResponseEntity<?> envoyerLien(@RequestBody Envoi envoi) {
-        try {
-            if (envoi.getIdQuest() == null || envoi.getIdCollab() == null || envoi.getIdCollab().isEmpty()) {
-                return ResponseEntity.badRequest().body("Les données sont incorrectes.");
-            }
-
-            List<String> liensEnvoyés = projProxy.envoyerLien(envoi);
-
-            if (liensEnvoyés.isEmpty()) {
-                return ResponseEntity.status(500).body("Aucun lien généré. Vérifier les adresses ou critères.");
-            }
-
-            return ResponseEntity.ok(liensEnvoyés);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Erreur interne : " + e.getMessage());
-        }
-    }
-
-
-
-    @GetMapping("/envoyerUUID")
-    public String afficherEnvoiUUIDForm() {
-        return "EnvoiUUID";
-    }
-
-    @PostMapping("/envoyerUUID")
-    public ResponseEntity<?> envoyerLienUUID(@RequestBody Envoi envoi) {
-        System.out.println("envoiUUID");
-
-        List<String> urls=projProxy.envoyerLienUUID(envoi);
-
-        try {
-
-            if (envoi.getIdQuest() == null || envoi.getIdCollab() == null || envoi.getIdCollab().isEmpty()) {
-                return ResponseEntity.badRequest().body("Les données sont incorrectes.");
-            }
-
-            if (urls.isEmpty()) {
-                return ResponseEntity.status(500).body("Aucun lien généré. Vérifier les adresses ou critères.");
-            }
-            return ResponseEntity.ok(urls);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Erreur interne : " + e.getMessage());
-        }
-    }
 
     @GetMapping("/nbQuest")
     public String afficherNbQuestForm() {
@@ -157,19 +78,6 @@ public class ProjController {
         }
     }
 
-
-    @GetMapping("/access/{token}")
-    public ModelAndView afficherQuestionnaireParToken(@PathVariable String token) {
-        AccessToken access = tokenService.getToken(token);
-        if (access != null) {
-            ModelAndView modelAndView = new ModelAndView("questionnaireView");
-            modelAndView.addObject("questionnaire", access.getQuestionnaire());
-            modelAndView.addObject("collaborator", access.getCollaborateur());
-            return modelAndView;
-        } else {
-            return new ModelAndView("errorPage");
-        }
-    }
     @GetMapping("/creerEnvoyer")
     public String afficherEnvoyerQuestionnaireForm() {
         return "CreationEnvoi";

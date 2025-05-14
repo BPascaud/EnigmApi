@@ -26,13 +26,10 @@ public class ProjRestController {
     @Autowired
     private TokenService tokenService;
 
-    @Autowired
-    public ErrorService errorService;
 
 
     private final List<Enigme> enigmes = TestData.getFakeEnigmes();
 
-    private final Map<String, AccessToken> tokensMap = new HashMap<>();
 
 
     @RequestMapping("/")
@@ -40,11 +37,13 @@ public class ProjRestController {
         return "accueil";
     }
 
-    @PostMapping("/creer")//en partant du principe qu'il faut 5 enigmes pour un questionnaire
+    @PostMapping("/creer")//en partant du principe qu'il faut 10 enigmes pour un questionnaire
     public Questionnaire creerQuestionnaire(@RequestBody Criteres critere) {
+        System.out.println("-----------");
+        System.out.println("Creer Questionnaire");
+        System.out.println("Criteres Compétences : " + critere.getCompetences()+"| Critéres niveaux :"+critere.getNiveaux());
         List<String> ordreNiveaux = Arrays.asList("diamant", "platine", "or", "bronze");
 
-        // Met les niveaux reçus en minuscules
         List<String> niveauxTries = ordreNiveaux.stream()
                 .filter(niv -> critere.getNiveaux().stream()
                         .map(String::toLowerCase)
@@ -52,7 +51,6 @@ public class ProjRestController {
                         .contains(niv))
                 .collect(Collectors.toList());
 
-        // Met les compétences reçues en minuscules
         List<String> competences = critere.getCompetences().stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
@@ -78,9 +76,10 @@ public class ProjRestController {
             }
             if (enigmesFiltrees.size() >= 10) break;//quitte la boucle niveau
         }
+        System.out.println("nb Enigmes: " + enigmes.size());
+        System.out.println("nb EnigmesFiltrées : "+enigmesFiltrees.size());
         System.out.println(enigmesFiltrees);
-        System.out.println("nbEnigmesFiltrées : "+enigmesFiltrees.size());
-        //filtre minimum 5 questions(optionel)
+        //filtre minimum 10 questions(optionel)
         if(enigmesFiltrees.size() <10){
             throw new RuntimeException("Pas assez d'enigmes pour créer un questionnaire !");
         }else{
@@ -92,13 +91,13 @@ public class ProjRestController {
 
     @PostMapping("/envoyer")
     public List<String> envoyerLien(@RequestBody Envoi envoi) {
+        System.out.println("-----------");
         System.out.println(envoi);
         List<String> urls = new ArrayList<>();
         System.out.println("envoyer");
 
         Optional<Questionnaire> optionalQuestionnaire = questionnaireService.getQuestionnaireById(envoi.getIdQuest());
         if (optionalQuestionnaire.isEmpty()) {
-            errorService.setError("Questionnaire non trouvé");
             throw new RuntimeException("Questionnaire non trouvé.");
         }
 
@@ -107,14 +106,12 @@ public class ProjRestController {
         for (String nom : envoi.getNoms()) {
             Person collaborateur = personService.getPersonByName(nom);
             if (collaborateur == null) {
-                errorService.setError("Collaborateur " + nom + " non trouvé");
                 continue;
             }
 
             int collabId = collaborateur.getId();
             String email = collaborateur.getMail();
             if (email == null) {
-                errorService.setError("Email pour le collaborateur " + nom + " non trouvé");
                 continue;
             }
 
@@ -128,6 +125,7 @@ public class ProjRestController {
 
     @PostMapping("/envoyerUUID")
     public List<String> envoyerLienUUID(@RequestBody Envoi envoi) {
+        System.out.println("-----------");
         System.out.println("envoiUUID");
         List<String> urls = new ArrayList<>();
 
@@ -135,7 +133,6 @@ public class ProjRestController {
                 .orElse(null);
 
         if (questionnaire == null) {
-            errorService.setError("Questionnaire non trouvé");
             throw new RuntimeException("Questionnaire non trouvé.");
         }
 
@@ -153,7 +150,6 @@ public class ProjRestController {
                 String email = collaborateur.getMail();
                 emailService.sendEmail(email, "Votre questionnaire", url);
             } else {
-                errorService.setError("Collaborateur " + nomCollab + " non trouvé");
             }
         }
         return urls;
@@ -161,6 +157,7 @@ public class ProjRestController {
 
     @PostMapping("/nbQuest")
     public int nombreDeQuestionnairesPossibles(@RequestBody Criteres critere) {
+        System.out.println("-----------");
         System.out.println("nbQuest");
 
         List<Enigme> enigmesFiltrees = enigmes.stream()
@@ -171,16 +168,32 @@ public class ProjRestController {
 
         System.out.println("nb enigmes filtrées :"+enigmesFiltrees.size());
 
-        int nbQuestionnaires = enigmesFiltrees.size() / 5;
+        int nbQuestionnaires = enigmesFiltrees.size() / 10;
 
         System.out.println("Nombre de questionnaires possibles : " + nbQuestionnaires);
         return nbQuestionnaires;
     }
     @PostMapping("/creerEnvoyer")
     public Questionnaire creerEnvoyerQuestionnaire(@RequestBody CreerEnvoyerRequest request) {
+        System.out.println("-----------");
+        System.out.println("CreerEnvoyerQuestionnaire");
         System.out.println(request.getCriteres());
         Questionnaire q=creerQuestionnaire(request.getCriteres());
         envoyerLienUUID(request.getEnvoi());
         return q;
+    }
+    @GetMapping("/access/{token}")
+    public ModelAndView afficherQuestionnaireParToken(@PathVariable String token) {
+        System.out.println("--------");
+        System.out.println("access token");
+        AccessToken access = tokenService.getToken(token);
+        if (access != null) {
+            ModelAndView modelAndView = new ModelAndView("questionnaireView");
+            modelAndView.addObject("questionnaire", access.getQuestionnaire());
+            modelAndView.addObject("collaborator", access.getCollaborateur());
+            return modelAndView;
+        } else {
+            return new ModelAndView("errorPage");
+        }
     }
 }
