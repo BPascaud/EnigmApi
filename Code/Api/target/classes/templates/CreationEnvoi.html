@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test POST /questionnaires/creer</title>
+    <link class="homer" rel="icon" type="image" href="/homer.jpg">
+    <style>
+        body {
+            background-image:url(https://blog.loisirsplaisirs.com/wp-content/uploads/2023/02/qu-est-ce-qu-une-nebuleuse.jpeg);
+            background-size: auto;
+            background-repeat: repeat;
+            color: yellow;
+        }
+        .criteres {
+            color: darkorange;
+            font-size: larger;
+        }
+    </style>
+</head>
+<body>
+<h1>Créer un questionnaire</h1>
+
+<form id="questionnaire-form">
+    <label>Compétences (séparées par des virgules)</label><br>
+    <input type="text" id="competences" name="competences" value="java,sql"><br><br>
+
+    <p class="criteres">java,sql,js,vue.js,spring boot</p>
+
+    <label>Niveaux (séparés par des virgules)</label><br>
+    <input type="text" id="niveaux" name="niveaux" value="BRONZE,OR"><br><br>
+
+    <p class="criteres">BRONZE,OR,PLATINE,DIAMANT</p>
+
+    <label>Noms des collaborateurs (séparés par des virgules)</label><br>
+    <input type="text" id="nom" name="nom" value="Durand,Lemoine"><br><br>
+
+    <p class="envoi">"nom1,nom2"</p>
+
+    <button type="submit">Créer</button>
+</form>
+
+<h2><a href="/questionnaires/"><button>Accueil</button></a></h2>
+<pre id="resultat"></pre>
+
+<script>
+    const form = document.getElementById("questionnaire-form");
+    const result = document.getElementById("resultat");
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const competences = document.getElementById("competences").value.split(",").map(s => s.trim());
+        const niveaux = document.getElementById("niveaux").value.split(",").map(s => s.trim());
+        const noms = document.getElementById("nom").value.split(",").map(s => s.trim());
+
+        const req = {
+            criteres: {  // Structure correcte pour envoyer les données
+                competences: competences,
+                niveaux: niveaux
+            },
+            envoi: {
+                noms: noms
+            }
+        };
+
+        fetch("http://localhost:8081/questionnaires/creerEnvoyer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(req)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Erreur HTTP : " + res.status);
+                return res.json();
+            })
+            .then(data => result.textContent = JSON.stringify(data, null, 2))
+            .catch(err => result.textContent = "Erreur : " + err);
+    });
+
+</script>
+</body>
+</html>

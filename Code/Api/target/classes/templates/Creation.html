@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test POST /questionnaires/creer</title>
+    <title>Employee web app</title>
+    <link class="homer" rel="icon" type="image" href="/homer.jpg">
+    <style>
+        body {
+            background-image:url(https://blog.loisirsplaisirs.com/wp-content/uploads/2023/02/qu-est-ce-qu-une-nebuleuse.jpeg);
+            background-size: auto;
+            background-repeat: repeat;
+            color: yellow;
+        }
+        .criteres{
+            color: darkorange;
+            font-size: larger;
+        }
+    </style>
+</head>
+<body>
+<h1>Créer un questionnaire</h1>
+
+<form id="questionnaire-form">
+    <label>Compétences (séparées par des virgules)</label><br>
+    <input type="text" id="competences" value="java,sql"><br><br>
+    <p>Compétences possibles:</p>
+    <p class="criteres">java,sql,js,vue.js,spring boot</p>
+
+    <label>Niveaux (séparés par des virgules)</label><br>
+    <input type="text" id="niveaux" value="BRONZE,OR"><br><br>
+    <p>Niveaux possibles:</p>
+    <p class="criteres">BRONZE,OR,PLATINE,DIAMANT</p>
+
+    <button type="submit">Creer</button>
+
+</form>
+<h2><a th:href="@{/questionnaires/}"><button>Accueil</button></a></h2>
+<pre id="resultat"></pre>
+
+<script>
+    const form = document.getElementById("questionnaire-form");
+    const result = document.getElementById("resultat");
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const competences = document.getElementById("competences").value.split(",").map(s => s.trim());
+        const niveaux = document.getElementById("niveaux").value.split(",").map(s => s.trim());
+
+        fetch("http://localhost:8081/questionnaires/creer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                competences: competences,
+                niveaux: niveaux
+            })
+        })
+            .then(res => res.json())
+            .then(data => result.textContent = JSON.stringify(data, null, 2))
+            .catch(err => result.textContent = "Erreur : "+err);
+    });
+</script>
+</body>
+</html>
