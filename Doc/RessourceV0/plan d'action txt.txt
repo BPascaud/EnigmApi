@@ -1,0 +1,39 @@
+(partie front)
+body: [
+        list<String> compétences, list<string> niveaux;
+				]String nom=critéresQuest
+
+(partie back)
+ArrayList<Questionnaire> listeQuest = [];
+
+
+public Q creerQ(ArrayList<String> compétence, ArrayList<String> niveaux) {
+        While (criteresQuest.compétence) !=null)
+        {
+            list<enigm> engimFiltrées=(SELECT * FROM enigms WHERE 
+            	enigm.compétence == criteresQuest.compétence.value AND
+            	enigm.niveau == critereQuest.niveau.value)
+
+            Q = new Q(id, list<enigms> enigmfiltrées);
+            listeQuest.append(Q);
+            return(Q);
+        }
+}
+
+(partie front)
+body: [
+        Integer idQuest, list<Integer> idCollab;
+				]String nom=critèresEnvoi
+
+(partie back)
+public list envoiLien(Integer idQuest,list<int> idCollab){
+	list<String> urls=[];
+	foreach(nbcollab in idCollab){
+		string url="/Questionnaire/{idQuest}/"+collab.toString();
+		urls.append(url);
+		to=Person.get(idCollab.getmail());
+		subject=Questionnaire;
+		body=url;
+		sendemail(to,subject,body)}
+	return urls;
+}
